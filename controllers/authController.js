@@ -9,26 +9,30 @@ const handleLogin = async (req, res) => {
     if (!user || !pwd) return res.status(400).json({ 'message': 'Username and password are required.' });
 
     const foundUser = await User.findOne({ username: user }).exec();
+    
     if (!foundUser) return res.sendStatus(401); //Unauthorized 
-    // evaluate password 
+
+    // Evaluate password 
     const match = await bcrypt.compare(pwd, foundUser.password);
     if (match) {
         const roles = Object.values(foundUser.roles).filter(Boolean);
+        const organization = foundUser.organization || null; // Assuming organization is a property in your User model
         // create JWTs
         const accessToken = jwt.sign(
             {
                 "UserInfo": {
                     "username": foundUser.username,
-                    "roles": roles
+                    "roles": roles,
+                    "organization": organization,
                 }
             },
             process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: '10s' }
+            { expiresIn: '30min' }
         );
         const newRefreshToken = jwt.sign(
             { "username": foundUser.username },
             process.env.REFRESH_TOKEN_SECRET,
-            { expiresIn: '15s' }
+            { expiresIn: '20m' }
         );
 
         // Changed to let keyword
@@ -38,7 +42,6 @@ const handleLogin = async (req, res) => {
                 : foundUser.refreshToken.filter(rt => rt !== cookies.jwt);
 
         if (cookies?.jwt) {
-
             /* 
             Scenario added here: 
                 1) User logs in but never uses RT and does not logout 
@@ -57,15 +60,15 @@ const handleLogin = async (req, res) => {
             res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
         }
 
-        // Saving refreshToken with current user
+        // Saving refreshToken with the current user
         foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
         const result = await foundUser.save();
-
+    
         // Creates Secure Cookie with refresh token
         res.cookie('jwt', newRefreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000 });
-
-        // Send authorization roles and access token to user
-        res.json({ accessToken });
+        //res.cookie('jwt');
+        // Send authorization roles, access token, and organization to the user
+        res.json({ accessToken, roles, organization });
 
     } else {
         res.sendStatus(401);

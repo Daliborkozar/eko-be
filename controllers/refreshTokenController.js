@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const handleRefreshToken = async (req, res) => {
     const cookies = req.cookies;
+    console.log(cookies, 'refresh token')
     if (!cookies?.jwt) return res.sendStatus(401);
     const refreshToken = cookies.jwt;
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
@@ -46,16 +47,17 @@ const handleRefreshToken = async (req, res) => {
                     "UserInfo": {
                         "username": decoded.username,
                         "roles": roles
+                        
                     }
                 },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: '10s' }
+                { expiresIn: '5s' }
             );
 
             const newRefreshToken = jwt.sign(
                 { "username": foundUser.username },
                 process.env.REFRESH_TOKEN_SECRET,
-                { expiresIn: '15s' }
+                { expiresIn: '5s' }
             );
             // Saving refreshToken with current user
             foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];

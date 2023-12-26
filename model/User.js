@@ -7,17 +7,21 @@ const userSchema = new Schema({
         required: true
     },
     roles: {
-        User: {
-            type: Number,
-            default: 2001
-        },
-        Editor: Number,
-        Admin: Number
+        User: String,
+        Admin: String,
+        SuperAdmin: String
     },
     password: {
         type: String,
         required: true
     },
+    organization: {
+        type: String
+    },
+     isActive: {
+        type: Boolean,
+        default: true
+    }, 
     refreshToken: [String]
 });
 

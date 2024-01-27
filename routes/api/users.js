@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const usersController = require('../../controllers/usersController');
+const orgAdminController = require('../../controllers/orgAdminController');
 const ROLES_LIST = require('../../config/roles_list');
 const verifyRoles = require('../../middleware/verifyRoles');
 
 router.route('/')
-    .get(usersController.getAllUsers)
+    .get(orgAdminController.getAllOrgUsers)
     //.get(verifyRoles(ROLES_LIST.Admin), usersController.getAllUsers)
-    .delete(verifyRoles(ROLES_LIST.Admin), usersController.deleteUser);
+    //.delete(verifyRoles(ROLES_LIST.Admin), usersController.deleteUser);
 
-router.route('/:id')
-    .get(verifyRoles(ROLES_LIST.Admin), usersController.getUser);
+// router.route('/:id')
+//     .get(verifyRoles(ROLES_LIST.Admin), usersController.getUser);
 
 module.exports = router;

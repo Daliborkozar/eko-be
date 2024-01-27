@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const credentials = require('./middleware/credentials');
 const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
+const bcrypt = require('bcrypt');
 const PORT = process.env.PORT || 3500;
 
 // Connect to MongoDB
@@ -22,6 +23,16 @@ app.use(logger);
 // Handle options credentials check - before CORS!
 // and fetch cookies credentials requirement
 app.use(credentials);
+
+const hashed_password = bcrypt.hash("dada", 10, (err, hash) => {
+    if (err) {
+      console.error('Error hashing password:', err);
+    } else {
+      console.log('Hashed Password:', hash);
+    }
+  });
+
+console.log(hashed_password)
 
 // Cross Origin Resource Sharing
 app.use(cors(corsOptions));
@@ -49,7 +60,8 @@ app.use('/logout', require('./routes/logout'));
 app.use(verifyJWT);
 app.use('/employees', require('./routes/api/employees'));
 app.use('/users', require('./routes/api/users'));
-app.use('/admin', require('./routes/api/admins'))
+app.use('/superadmin', require('./routes/api/superadmins'))
+app.use('/', require('./routes/api/superadmins'))
 
 
 app.all('*', (req, res) => {

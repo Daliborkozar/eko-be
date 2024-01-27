@@ -18,10 +18,18 @@ const userSchema = new Schema({
     organization: {
         type: String
     },
+    email: {
+        type: String,
+        unique: true
+    },
      isActive: {
         type: Boolean,
         default: true
-    }, 
+    },
+    displayName: {
+        type: String,
+    },
+    createdAt: { type: Date, default: Date.now },
     refreshToken: [String]
 });
 

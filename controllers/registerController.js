@@ -2,8 +2,8 @@ const User = require('../model/User');
 const bcrypt = require('bcrypt');
 
 const handleNewUser = async (req, res) => {
-    const { user, pwd, roles, organization, isActive } = req.body;
-
+    const { user, pwd, roles, organization, isActive, displayName, email } = req.body;
+   
     try {
         // Check if the user making the request is a super admin
         const requestingUser = req.user; // Assuming you have middleware to extract the user from the request
@@ -11,9 +11,16 @@ const handleNewUser = async (req, res) => {
             // The user making the request is a super admin
 
             // check for duplicate usernames in the db
-            const duplicate = await User.findOne({ username: user }).exec();
+            const duplicateUser = await User.findOne({ username: user }).exec();
+            const duplicateEmail = await User.findOne({ email: email}).exec()
            // if (duplicate) return res.sendStatus(409); // Conflict 
+           if (duplicateUser) {
+            return res.status(409).json({ error: 'Username already exists' });
+        }
 
+        if (duplicateEmail) {
+            return res.status(409).json({ error: 'Email already exists' });
+        }
             // encrypt the password
             const hashedPwd = await bcrypt.hash(pwd, 10);
 
@@ -22,8 +29,10 @@ const handleNewUser = async (req, res) => {
                 "username": user,
                 "password": hashedPwd,
                 "roles": roles,
+                "displayName": displayName,
                 "organization" : organization,
-                "isActive": isActive
+                "isActive": isActive,
+                "email": email
             });
 
             console.log(result);
